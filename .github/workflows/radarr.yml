@@ -1,15 +1,15 @@
-name: Build and Publish Sonarr Container Image
+name: Build and Publish Radarr Container Image
 on:
   push:
     branches:
       - main
-    paths: # Only trigger on changes to Sonarr source, excluding Helm chart changes
-      - sonarr/**
-      - '!sonarr/helm/**'
+    paths: # Only trigger on changes to Radarr source, excluding Helm chart changes
+      - radarr/**
+      - '!radarr/helm/**'
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: sonarr
-  SONARR_VERSION: "4.0.16.2944"
+  IMAGE_NAME: radarr
+  RADARR_VERSION: "6.0.4.10291"
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -36,12 +36,12 @@ jobs:
         id: push
         uses: docker/build-push-action@v6
         with:
-          context: ./sonarr
+          context: ./radarr
           push: true
-          file: ./sonarr/Dockerfile
+          file: ./radarr/Dockerfile
           tags: |
             ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
-            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ env.SONARR_VERSION }}
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ env.RADARR_VERSION }}
       
       - name: Attest container image
         uses: actions/attest-build-provenance@v3
