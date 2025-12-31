@@ -1,0 +1,39 @@
+name: Build and Publish Sonarr Container Image
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - sonarr/**
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: sonarr
+  SONARR_VERSION: "4.0.16.2944"
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+      
+      - name: Log in to the container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+    
+      - name: Build and push container image
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          file: ./sonarr/Dockerfile
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ env.SONARR_VERSION }}
+    
