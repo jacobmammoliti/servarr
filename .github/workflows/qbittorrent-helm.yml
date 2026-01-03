@@ -1,0 +1,37 @@
+name: Package and Publish qBittorrent Helm Chart
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - qbittorrent/helm/**
+env:
+  REGISTRY: ghcr.io
+  HELM_CHART_NAME: qbittorrent
+jobs:
+  package-and-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+      
+      - name: Set up Helm
+        uses: azure/setup-helm@v4.3.0
+      
+      - name: Log in to the container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Package and publish Helm chart
+        run: |
+          VERSION=$(grep '^version:' qbittorrent/helm/Chart.yaml | awk '{print $2}')
+          helm package qbittorrent/helm
+          helm push qbittorrent-${VERSION}.tgz oci://${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.HELM_CHART_NAME }}
