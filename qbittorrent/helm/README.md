@@ -1,6 +1,6 @@
 # qbittorrent
 
-![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 5.1.4](https://img.shields.io/badge/AppVersion-5.1.4-informational?style=flat-square)
+![Version: 0.2.1](https://img.shields.io/badge/Version-0.2.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 5.1.4](https://img.shields.io/badge/AppVersion-5.1.4-informational?style=flat-square)
 
 A Helm chart for qBittorrent
 
@@ -17,7 +17,8 @@ A Helm chart for qBittorrent
 | extraEnvironmentVars | object | `{}` |  |
 | fullnameOverride | string | `""` |  |
 | gluetun.enabled | bool | `false` |  |
-| gluetun.env | object | `{}` |  |
+| gluetun.env[0].name | string | `"FIREWALL_INPUT_PORTS"` |  |
+| gluetun.env[0].value | string | `"8080"` |  |
 | gluetun.image.pullPolicy | string | `"IfNotPresent"` |  |
 | gluetun.image.repository | string | `"qmcgaw/gluetun"` |  |
 | gluetun.image.tag | string | `"v3.41.0"` |  |
@@ -40,11 +41,17 @@ A Helm chart for qBittorrent
 | istio.http[0].match[0].uri.prefix | string | `"/"` |  |
 | istio.http[0].route[0].destination.host | string | `"qbittorrent"` |  |
 | istio.http[0].route[0].destination.port.number | int | `8080` |  |
+| livenessProbe.failureThreshold | int | `1` |  |
+| livenessProbe.periodSeconds | int | `10` |  |
+| livenessProbe.tcpSocket.port | int | `8080` |  |
 | nameOverride | string | `""` |  |
 | nodeSelector | object | `{}` |  |
 | podAnnotations | object | `{}` |  |
 | podLabels | object | `{}` |  |
 | podSecurityContext | object | `{}` |  |
+| readinessProbe.failureThreshold | int | `1` |  |
+| readinessProbe.periodSeconds | int | `10` |  |
+| readinessProbe.tcpSocket.port | int | `8080` |  |
 | replicaCount | int | `1` |  |
 | resources | object | `{}` |  |
 | securityContext | object | `{}` |  |
@@ -54,6 +61,9 @@ A Helm chart for qBittorrent
 | serviceAccount.automount | bool | `true` |  |
 | serviceAccount.create | bool | `true` |  |
 | serviceAccount.name | string | `""` |  |
+| startupProbe.failureThreshold | int | `10` |  |
+| startupProbe.periodSeconds | int | `10` |  |
+| startupProbe.tcpSocket.port | int | `8080` |  |
 | tolerations | list | `[]` |  |
 | volumeMounts | list | `[]` |  |
 | volumes | list | `[]` |  |
