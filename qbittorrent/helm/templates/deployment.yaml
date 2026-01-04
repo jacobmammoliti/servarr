@@ -31,6 +31,36 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
+        {{- if .Values.gluetun.enabled }}
+        - name: gluetun
+          {{- with .Values.gluetun.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.gluetun.image.repository }}:{{ .Values.gluetun.image.tag }}"
+          imagePullPolicy: {{ .Values.gluetun.image.pullPolicy }}
+          volumeMounts:
+            - name: nettun
+              mountPath: /dev/net/tun
+          ports:
+            - name: http-proxy
+              containerPort: 8888
+              protocol: TCP
+            - name: shadowsocks-tcp
+              containerPort: 8388
+              protocol: TCP
+            - name: shadowsocks-udp
+              containerPort: 8388
+              protocol: UDP
+          {{- with .Values.gluetun.env }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.gluetun.envFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}       
+        {{- end }}
         - name: {{ .Chart.Name }}
           {{- with .Values.securityContext }}
           securityContext:
@@ -73,6 +103,11 @@ spec:
         - name: config
           persistentVolumeClaim:
             claimName: {{ include "qbittorrent.fullname" . }}
+        {{- if .Values.gluetun.enabled }}
+        - name: nettun
+          hostPath:
+            path: /dev/net/tun
+        {{- end}}
       {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
