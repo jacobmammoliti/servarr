@@ -1,0 +1,54 @@
+name: Build and Publish Prowlarr Container Image
+on:
+  push:
+    branches:
+      - main
+    paths: # Only trigger on changes to Prowlarr source, excluding Helm chart changes
+      - prowlarr/**
+      - '!prowlarr/helm/**'
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: prowlarr
+  PROWLARR_VERSION: "2.3.0.5236"
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v4.0.0
+      
+      - name: Log in to the container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+    
+      - name: Build and push container image
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./prowlarr
+          push: true
+          file: ./prowlarr/Dockerfile
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ env.PROWLARR_VERSION }}
+      
+      - name: Attest container image
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
+      
+      - name: Sign container image
+        run: cosign sign ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}
