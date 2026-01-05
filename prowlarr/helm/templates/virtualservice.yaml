@@ -1,0 +1,19 @@
+{{- if .Values.istio.enabled -}}
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: {{ include "prowlarr.fullname" . }}
+  labels:
+    {{- include "prowlarr.labels" . | nindent 4 }}
+spec:
+  hosts:
+    {{- range .Values.istio.hostnames }}
+    - {{ . | quote }}
+    {{- end }}
+  gateways:
+    {{- range .Values.istio.gateways }}
+    - {{ . }}
+    {{- end }}
+  http:
+    {{- toYaml .Values.istio.http | nindent 4 }}
+{{- end }}

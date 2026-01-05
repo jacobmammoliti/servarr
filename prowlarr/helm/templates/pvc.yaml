@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "prowlarr.fullname" . }}
+spec:
+  accessModes: [ {{ .Values.configStorage.accessMode }}]
+  {{ if .Values.configStorage.storageClass }}
+  storageClassName: {{ .Values.configStorage.storageClass }}
+  {{ end }}
+  resources:
+    requests:
+      storage: {{ .Values.configStorage.size }}
